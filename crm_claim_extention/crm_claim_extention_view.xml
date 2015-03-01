@@ -10,6 +10,9 @@
             <field name="arch" type="xml">
                 <field name="name" position="after">
                             <field name="user_id"/>
+                            <field name="day_to_action_next"/>
+                            <field name="action_next"/>
+                            <field name="days_to_date_deadline"/>
                 </field>
             </field>
         </record>
@@ -23,6 +26,88 @@
                             <field name="user_id"/>
                 </field>
             </field>
+        </record>
+        <record id="inherit_crm_claim_form" model="ir.ui.view">
+            <field name="name">crm.claim.inherit</field>
+            <field name="model">crm.claim</field>
+            <field name="type">form</field>
+            <field name="inherit_id" ref="crm_claim.crm_case_claims_form_view"/>
+            <field name="arch" type="xml">
+                <field name="name" position="after">
+                            <field name="origin"/>
+                            <field name="products_id" widget="many2many_tags"  options="{'no_create_edit': True}"/>
+                </field>
+                <field name="priority" position="after">
+                            <field name="has_check_solution"/>
+                </field>
+            </field>
+        </record>
+ 
+       <record id="inherit_crm_claim_tree" model="ir.ui.view">
+            <field name="name">crm.claim.inherit</field>
+            <field name="model">crm.claim</field>
+            <field name="type">tree</field>
+            <field name="inherit_id" ref="crm_claim.crm_case_claims_tree_view"/>
+            <field name="arch" type="xml">
+                <field name="name" position="before">
+                            <field name="number_id"/>
+                </field>
+            </field>
+        </record>
+      <record id="view_crm_case_claims_seq_filter" model="ir.ui.view">
+            <field name="model">crm.claim</field>
+            <field name="type">search</field>
+            <field name="inherit_id" ref="crm_claim.view_crm_case_claims_filter" />
+            <field name="arch" type="xml">
+                <data>
+                    <field name="name" position="before">
+                        <field name="number_id" />
+                    </field>
+                </data>
+            </field>
+        </record>
+
+    
+        <!--
+        Case Stage
+        -->
+        
+        <record model="crm.claim.stage" id="stage_claim1">
+            <field name="name">INICIADO</field>
+            <field name="sequence">1</field>
+            <field name="case_default" eval="True"/>
+        </record>
+        <record model="crm.claim.stage" id="stage_claim5">
+            <field name="name">CONFIRMADO</field>
+            <field name="sequence">27</field>
+            <field name="case_default" eval="False"/>
+        </record>
+        <record model="crm.claim.stage" id="stage_claim2">
+            <field name="name">VISITA</field>
+            <field name="sequence">28</field>
+            <field name="case_default" eval="True"/>
+        </record>
+        <record model="crm.claim.stage" id="stage_claim3">
+            <field name="name">RESOLUCION</field>
+            <field name="sequence">29</field>
+            <field name="case_default" eval="False"/>
+        </record>
+        
+        <record model="crm.claim.stage" id="stage_claim4">
+            <field name="name">SOLUCIONADO</field>
+            <field name="sequence">30</field>
+            <field name="case_default" eval="True"/>
+        </record>
+
+        <record model="crm.claim.stage" id="stage_claim6">
+            <field name="name">INVALIDO</field>
+            <field name="sequence">30</field>
+            <field name="case_default" eval="True"/>
+        </record>
+        <record model="crm.claim.stage" id="stage_claim7">
+            <field name="name">DEFENSA CCONSUMIDOR</field>
+            <field name="sequence">30</field>
+            <field name="case_default" eval="True"/>
         </record>
 
      </data>

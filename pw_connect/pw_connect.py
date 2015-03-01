@@ -2,7 +2,7 @@
 ##############################################################################
 #
 #    OpenERP, Open Source Management Solution
-#    Copyright (C) 2004-2010 Tiny SPRL (<http://tiny.be>).
+#    Copyright (C) 2004-today OpenERP SA (<http://www.openerp.com>)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU Affero General Public License as
@@ -19,31 +19,31 @@
 #
 ##############################################################################
 
+import openerp
+from openerp.osv import fields, osv , models
+from openerp import tools
+from openerp.tools.translate import _
 
-{
-    'name': 'Claims Management extention',
-    'version': '0.1',
-    'category': 'Customer Relationship Management extention',
-    'description': """
 
-Extiende las funcionalidades de reclamos.
-=======================
-This application allows you to track your customers/suppliers claims and grievances.
+class Configuration(osv.TransientModel):
+    _name = 'pw.connect.config.settings'
+    _inherit = 'res.config.settings'
 
-It is fully integrated with the email gateway so that you can create
-automatically new claims based on incoming emails.
-    """,
-    'author': 'Filoquin',
-    'website': 'http://sipecu.com.ar',
-    'depends': ['crm','crm_claim'],
-    "init_xml" : [
-            "crm_claim_sequence.xml",
-        ],
-    'data': [
-        'crm_claim_extention_view.xml',
-    ],
-    'installable': True,
-    'auto_install': False,
-}
-
-# vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
+    pw_connect_url = fields.Char(
+        string='Url for connection',
+        required=True,
+        help="Path",
+        default_model='pw.connect.config.settings',
+    )
+    pw_connect_user = fields.Char(
+        string='User for connection',
+        required=True,
+        help="User db",
+        default_model='pw.connect.config.settings',
+    )
+    pw_connect_password = fields.Char(
+        string='password for connection',
+        required=True,
+        help="pass",
+        default_model='pw.connect.config.settings',
+    )

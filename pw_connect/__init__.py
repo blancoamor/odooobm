@@ -19,31 +19,8 @@
 #
 ##############################################################################
 
-
-{
-    'name': 'Claims Management extention',
-    'version': '0.1',
-    'category': 'Customer Relationship Management extention',
-    'description': """
-
-Extiende las funcionalidades de reclamos.
-=======================
-This application allows you to track your customers/suppliers claims and grievances.
-
-It is fully integrated with the email gateway so that you can create
-automatically new claims based on incoming emails.
-    """,
-    'author': 'Filoquin',
-    'website': 'http://sipecu.com.ar',
-    'depends': ['crm','crm_claim'],
-    "init_xml" : [
-            "crm_claim_sequence.xml",
-        ],
-    'data': [
-        'crm_claim_extention_view.xml',
-    ],
-    'installable': True,
-    'auto_install': False,
-}
+import crm_claim_extention
+#import report
 
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
+

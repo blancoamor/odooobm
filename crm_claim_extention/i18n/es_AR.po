@@ -1,25 +1,46 @@
-# Spanish (Argentina) translation for openobject-addons
-# Copyright (c) 2015 filoquin Contributors and Canonical Ltd 2014
-# This file is distributed under the same license as the openobject-addons package.
-# FIRST AUTHOR <EMAIL@ADDRESS>, 2014.
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+#   * crm_claim_extention
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: openobject-addons\n"
-"Report-Msgid-Bugs-To: FULL NAME <EMAIL@ADDRESS>\n"
-"POT-Creation-Date: 2015-01-21 14:07+0000\n"
-"PO-Revision-Date: 2014-08-14 16:10+0000\n"
-"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
-"Language-Team: Spanish (Argentina) <es_AR@li.org>\n"
+"Project-Id-Version: Odoo Server 8.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2015-02-26 01:37+0000\n"
+"PO-Revision-Date: 2015-02-26 01:37+0000\n"
+"Last-Translator: <>\n"
+"Language-Team: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
-"Content-Transfer-Encoding: 8bit\n"
-"X-Launchpad-Export-Date: 2015-01-22 07:37+0000\n"
-"X-Generator: Launchpad (build 17306)\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: \n"
 
+#. module: crm_claim_extention
+#: model:ir.model,name:crm_claim_extention.model_crm_claim
+msgid "Claim"
+msgstr "Reclamación"
 
-#. module: crm_claim
-#: view:crm.claim:crm_claim.view_crm_case_claims_filter
-#: field:crm.claim,user_id:0
+#. module: crm_claim_extention
+#: model:ir.model,name:crm_claim_extention.model_crm_claim_stage
+msgid "Claim stages"
+msgstr "Etapas de reclamación"
+
+#. module: crm_claim_extention
+#: field:crm.claim,origin:0
+msgid "Origin"
+msgstr "Origen"
+
+#. module: crm_claim_extention
+#: field:crm.claim,products_id:0
+msgid "Productos"
+msgstr "Productos"
+
+#. module: crm_claim_extention
+#: field:crm.claim.stage,user_id:0
 msgid "Responsible"
 msgstr "Responsable"
+
+#. module: crm_claim_extention
+#: field:crm.claim,has_check_solution:0
+msgid "has check soluction"
+msgstr "Se puede solucionar en la primer visita"

@@ -21,26 +21,21 @@
 
 
 {
-    'name': 'Claims Management extention',
+    'name': 'pw connect',
     'version': '0.1',
-    'category': 'Customer Relationship Management extention',
+    'category': 'Conecta con PW',
     'description': """
 
-Extiende las funcionalidades de reclamos.
+Coneccion a PW
 =======================
-This application allows you to track your customers/suppliers claims and grievances.
+Configura una coneccion a PW
+requiere pymssql
 
-It is fully integrated with the email gateway so that you can create
-automatically new claims based on incoming emails.
     """,
     'author': 'Filoquin',
     'website': 'http://sipecu.com.ar',
-    'depends': ['crm','crm_claim'],
-    "init_xml" : [
-            "crm_claim_sequence.xml",
-        ],
+    'depends': [],
     'data': [
-        'crm_claim_extention_view.xml',
     ],
     'installable': True,
     'auto_install': False,
