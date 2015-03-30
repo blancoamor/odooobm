@@ -9,6 +9,7 @@ from decimal import *
 
 class pw2odoo(object):
 
+    log_type='print'
     country_states = {}
     category_map = {}
     supplier_res_id = {}
@@ -22,6 +23,7 @@ class pw2odoo(object):
     product_template_id = {}
     product_product_id = {}
 
+
     def __init__(self,url,dbname,username,pwd):
 
         self.url = url
@@ -34,6 +36,7 @@ class pw2odoo(object):
 
     def connect_odoo(self):
         sock_common = xmlrpclib.ServerProxy ('http://'+ self.url +'/xmlrpc/common')
+
         self.uid = sock_common.login(self.dbname, self.username, self.pwd)
         self.sock = xmlrpclib.ServerProxy('http://'+ self.url +'/xmlrpc/object')
 
@@ -50,22 +53,22 @@ class pw2odoo(object):
 
     def ir_set_config_parameter(self,key,value):
       args = [('key', '=', key),]
-      ids = self.sock.execute(dbname, uid, pwd, 'ir.config_parameter', 'search', args)
+      ids = self.sock.execute(self.dbname, self.uid, self.pwd, 'ir.config_parameter', 'search', args)
       
       if ids:
         fields = ['id','value','key'] #fields to read
 
-        data = self-sock.execute(dbname, uid, pwd, 'ir.config_parameter', 'read', ids, fields)
+        data = self.sock.execute(self.dbname, self.uid, self.pwd, 'ir.config_parameter', 'read', ids, fields)
         parameter ={'value':str(value), 'key':key  }
-        partner_id = sock.execute(dbname, uid, pwd, 'ir.config_parameter', 'write',ids , parameter)
+        partner_id = self.sock.execute(self.dbname, self.uid, self.pwd, 'ir.config_parameter', 'write',ids , parameter)
 
       else:
         parameter ={'value':str(value), 
                     'key':key ,
         }
-            #partner_id = sock.execute(dbname, uid, pwd, 'res.partner', 'create', partner)
+            #partner_id = sock.execute(self.dbname, self.uid, self.pwd, 'res.partner', 'create', partner)
 
-        parameter_id = self.sock.execute(dbname, uid, pwd, 'ir.config_parameter', 'create',parameter)
+        parameter_id = self.sock.execute(dbname, uid, self.pwd, 'irself..confself.ig_parameter', 'create',parameter)
       
     def res_partner_get_id(self,ClienteKey):
       if hasattr(self.res_partner_id, str(ClienteKey)):
@@ -74,9 +77,9 @@ class pw2odoo(object):
         model = 'ir.model.data'
         #args = [('name', '=', 'CK' + str(ClienteKey)),('model', '=', 'res.users'),]
         args = [('name', '=', str(ClienteKey)),('model', '=', 'res.partner'),]
-        ids = self.sock.execute(dbname, uid, pwd, 'ir.model.data', 'search', args)
+        ids = self.sock.execute(self.dbname, self.uid, self.pwd, 'ir.model.data', 'search', args)
         fields = ['res_id'] #fields to read
-        data = self.sock.execute(dbname, uid, pwd, 'ir.model.data', 'read', ids, fields)
+        data = self.sock.execute(self.dbname, self.uid, self.pwd, 'ir.model.data', 'read', ids, fields)
         if len(data):
           self.res_partner_id[ClienteKey]=data[0]['res_id']
           return self.res_partner_id[ClienteKey]
@@ -89,9 +92,9 @@ class pw2odoo(object):
       else :
         model = 'ir.model.data'
         args = [('name', '=', 'UK' + str(UsuarioKey)),('model', '=', 'res.users'),]
-        ids = self.sock.execute(dbname, uid, pwd, 'ir.model.data', 'search', args)
+        ids = self.sock.execute(self.dbname, self.uid, self.pwd, 'ir.model.data', 'search', args)
         fields = ['res_id'] #fields to read
-        data = self.sock.execute(dbname, uid, pwd, 'ir.model.data', 'read', ids, fields)
+        data = self.sock.execute(self.dbname, self.uid, self.pwd, 'ir.model.data', 'read', ids, fields)
         if len(data):
           self.res_users_id[UsuarioKey]=data[0]['res_id']
           return self.res_users_id[UsuarioKey]
@@ -105,9 +108,9 @@ class pw2odoo(object):
           model = 'ir.model.data'
           #args = [('name', '=', 'CK' + str(ClienteKey)),('model', '=', 'res.users'),]
           args = [('name' , '=' ,self.claim_stage_map[estado]),]
-          ids = self.sock.execute(dbname, uid, pwd, 'crm.claim.stage', 'search', args)
+          ids = self.sock.execute(self.dbname, self.uid, self.pwd, 'crm.claim.stage', 'search', args)
           fields = ['id'] #fields to read
-          data = self.sock.execute(dbname, uid, pwd, 'crm.claim.stage', 'read', ids, fields)
+          data = self.sock.execute(self.dbname, self.uid, self.pwd, 'crm.claim.stage', 'read', ids, fields)
           if len(data):
             self.claim_stage_id[estado]=data[0]['id']
             return self.claim_stage_id[estado]
@@ -119,9 +122,9 @@ class pw2odoo(object):
       else :
         model = 'ir.model.data'
         args = [('name', '=', 'AK' + str(ArticuloKey)),('model', '=', 'product.template'),]
-        ids = self.sock.execute(dbname, uid, pwd, 'ir.model.data', 'search', args)
+        ids = self.sock.execute(self.dbname, self.uid, self.pwd, 'ir.model.data', 'search', args)
         fields = ['res_id'] #fields to read
-        data = self.sock.execute(dbname, uid, pwd, 'ir.model.data', 'read', ids, fields)
+        data = self.sock.execute(self.dbname, self.uid, self.pwd, 'ir.model.data', 'read', ids, fields)
         if len(data):
           self.product_template_id[ArticuloKey]=data[0]['res_id']
           return self.product_template_id[ArticuloKey]
@@ -134,13 +137,13 @@ class pw2odoo(object):
       else :
         model = 'ir.model.data'
         args = [('name', '=', 'AK' + str(ArticuloKey)),('model', '=', 'product.template'),]
-        ids = self.sock.execute(dbname, uid, pwd, 'ir.model.data', 'search', args)
+        ids = self.sock.execute(self.dbname, self.uid, self.pwd, 'ir.model.data', 'search', args)
         if ids:
           fields = ['res_id'] #fields to read
-          data_tmp = self.sock.execute(dbname, uid, pwd, 'ir.model.data', 'read', ids, fields)
+          data_tmp = self.sock.execute(self.dbname, self.uid, self.pwd, 'ir.model.data', 'read', ids, fields)
 
           args = [('product_tmpl_id', '=', data_tmp[0]['res_id']),]
-          ids = self.sock.execute(dbname, uid, pwd, 'product.product', 'search', args)
+          ids = self.sock.execute(self.dbname, self.uid, self.pwd, 'product.product', 'search', args)
           if len(ids):
             self.product_template_id[ArticuloKey]=ids[0]
             return self.product_template_id[ArticuloKey]
@@ -216,9 +219,12 @@ class pw2odoo(object):
         ids = self.sock.execute(self.dbname, self.uid, self.pwd, 'ir.model.data', 'search', args)
         if ids :
             self.update(ids,row)
+            self.log('update',row)
+
         else:
             self.insert(row)
-        self.after_insert_update(self,row)
+            self.log('insert',row)
+        self.after_insert_update(row)
 
 
     def insert(self,row):
@@ -240,6 +246,9 @@ class pw2odoo(object):
         data = self.sock.execute(self.dbname, self.uid, self.pwd,'ir.model.data', 'read', ids, fields)
         odooObject=self.mapping(row)
         odoo_id = self.sock.execute(self.dbname, self.uid, self.pwd, self.odooModel, 'write',data[0]['res_id'], odooObject)
+    def log(self,action,row):
+         if(self.log_type=='print'):
+            print action + " " + self.pwKey + ":" + str(row[self.pwKey]) + " -> "  + self.odooModel
 
 class pw_proveedor(pw2odoo):
     prefixKey="PK"
@@ -383,9 +392,9 @@ class pw_cliente(pw2odoo):
         # display_name | customer | create_uid | image_medium | mobile | ref | image_small | birthdate | is_company | 
         # state_id | commercial_partner_id | notify_email | message_last_post | opt_out | section_id | signup_type | 
         # signup_expiration | signup_token | calendar_last_notif_ack | last_reconciliation_date | debit_limit | vat_subjected 
+
         mob=re.compile('15[4|5|6](\-)*[0-9][0-9][0-9][0-9][0-9][0-9]')
         email_regepx=re.compile('[^@]+@[^@]+\.[^@]+')
-
         relations = {
         'Activo':'active',
         'Email':'email',
@@ -451,6 +460,7 @@ class pw_cliente(pw2odoo):
         if row['NombreProvincia'] :
          partner['state_id']=self.country_states[row['NombreProvincia']]
 
+
         return partner
 
 
@@ -499,14 +509,14 @@ class category(pw2odoo):
          'name': row['Nombre'].lstrip().rstrip().title(),
          'parent_id': odoo_parent,
       }
-      category_id = self.sock.execute(dbname, uid, pwd, 'product.category', 'write',data[0]['res_id'], category)
+      category_id = self.sock.execute(self.dbname, self.uid, self.pwd, 'product.category', 'write',data[0]['res_id'], category)
 
 class crm_claim(pw2odoo):
     prefixKey="ERK"
     pwKey="EventoKey"
     odooModel='crm.claim'
 
-    def crm_claim_import_from_time(start):
+    def import_from_time(start):
 
       cursor.execute("select   e.* , ee.Estado ,e.UsuarioKey as usuario , evest.fecha as fechacambioestado "
                      "from EventoEstado evest "
@@ -519,7 +529,7 @@ class crm_claim(pw2odoo):
                      "order by Fecha asc " % (start))
       last_time=''
 
-    def crm_claim_mapping(row):
+    def mapping(row):
       row['partner_id']=self.res_partner_get_id(row['ClienteKey'])
       row['stage_id']=self.claim_stage_get_id(row['Estado'])
       row['user_id']=self.user_get_id(row['UsuarioKey'])
@@ -571,6 +581,131 @@ class crm_claim(pw2odoo):
       return crm_claim
 
 
+class pricelist(pw2odoo):
+    prefixKey="LPK"
+    pwKey="ListaPreciosKey"
+    odooModel='product.pricelist'
 
-transaction=pw_cliente('localhost:8069',dbname,username,pwd)
-transaction.import_all(0)
+    def import_all(self,start):
+      
+      self.cursor.execute("SELECT * FROM listaprecios ")
+      for row in self.cursor.fetchall():
+        self.insert_update(self,row)
+
+    def mapping(row):
+      relations = {
+       'Activo':'active',
+      }
+      product_pricelist = {
+        'name': row['Nombre'].lstrip().rstrip().title(),
+        'type': 'sale',
+        'currency_id' : 20 ,
+      }
+
+
+      for key in relations:
+         if row[key] is not None:
+            product_pricelist[relations[key]]=row[key]
+
+      return product_pricelist
+
+class pricelist_version(pw2odoo):
+    prefixKey="LPKV"
+    pwKey="ListaPreciosKey"
+    odooModel='product.pricelist.version'
+
+    def import_all(self,start):
+      
+      self.cursor.execute("SELECT * FROM listaprecios ")
+      for row in self.cursor.fetchall():
+        self.insert_update(self,row)
+
+    def mapping(row,pricelist_id):
+      relations = {
+         'Activo':'active',
+      }
+
+      product_pricelist = {
+        'name': row['Nombre'].lstrip().rstrip().title(),
+        'pricelist_id': pricelist_id,
+      }
+
+
+      for key in relations:
+         if row[key] is not None:
+            product_pricelist[relations[key]]=row[key]
+
+      return product_pricelist
+
+
+
+class pw_users(pw2odoo):
+    prefixKey="UK"
+    pwKey="UsuarioKey"
+    odooModel='res.users'
+
+    def import_all(self,start):
+      
+      self.cursor.execute("SELECT * from Usuario WHERE activo =1 and UsuarioKey<>1  ")
+      for row in self.cursor.fetchall():
+        self.insert_update(self,row)
+
+    def mapping(row):
+      partner = {
+         'name': row['Nombre'].lstrip().rstrip().title(),
+         'active':row['Activo'],
+         'lang':'es_AR',
+      }
+
+      partner_id = sock.execute(self.dbname, self.uid, self.pwd, 'res.partner', 'create', partner)
+
+      user = {
+         'login': row['Nombre'],
+         'password': row['Contrasenia'],
+         'partner_id': partner_id,
+      }
+      return user
+
+    def update(self,ids,row):
+      print "not update"
+
+      
+      return user
+
+
+
+
+class pw_invoice(pw2odoo):
+    prefixKey="OK"
+    pwKey="OperacionKey"
+    odooModel='res.users'
+
+    def import_all(self,start):
+      
+      self.cursor.execute("SELECT * from Usuario WHERE activo =1 and UsuarioKey<>1  ")
+      for row in self.cursor.fetchall():
+        self.insert_update(self,row)
+
+    def mapping(row):
+      partner = {
+         'name': row['Nombre'].lstrip().rstrip().title(),
+         'active':row['Activo'],
+         'lang':'es_AR',
+      }
+
+      partner_id = sock.execute(self.dbname, self.uid, self.pwd, 'res.partner', 'create', partner)
+
+      user = {
+         'login': row['Nombre'],
+         'password': row['Contrasenia'],
+         'partner_id': partner_id,
+      }
+      return user
+
+    def update(self,ids,row):
+      print "not update"
+
+      
+      return user
+
+

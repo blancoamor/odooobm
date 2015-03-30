@@ -6,14 +6,44 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 8.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-02-26 01:37+0000\n"
-"PO-Revision-Date: 2015-02-26 01:37+0000\n"
+"POT-Creation-Date: 2015-03-30 16:20+0000\n"
+"PO-Revision-Date: 2015-03-30 13:25-0300\n"
 "Last-Translator: <>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
-"Content-Transfer-Encoding: \n"
+"Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: \n"
+"X-Generator: Poedit 1.5.4\n"
+
+#. module: crm_claim_extention
+#: model:ir.actions.act_window,help:crm_claim_extention.crm_claim_type_act
+msgid ""
+"<p class=\"oe_view_nocontent_create\">\n"
+"                Click to setup a new stage in the processing of the "
+"claims. \n"
+"              </p><p>\n"
+"                You can create claim stages to categorize the status of "
+"every\n"
+"                claim entered in the system. The stages define all the "
+"steps\n"
+"                required for the resolution of a claim.\n"
+"              </p>\n"
+"            "
+msgstr ""
+"<p class=\"oe_view_nocontent_create\">\n"
+"Pulse para establece una nueva etapa en el procesamiento de reclamaciones.\n"
+"</p><p>\n"
+"Puede crear etapas de reclamación para categorizar el estado de cada "
+"reclamación que entre en el sistema. Las etapas definen todos los pasos "
+"requeridos para la resolución de una reclamación.\n"
+"</p>\n"
+"            "
+
+#. module: crm_claim_extention
+#: model:crm.claim.stage,name:crm_claim_extention.stage_claim5
+msgid "CONFIRMADO"
+msgstr "CONFIRMADO"
 
 #. module: crm_claim_extention
 #: model:ir.model,name:crm_claim_extention.model_crm_claim
@@ -21,9 +51,95 @@ msgid "Claim"
 msgstr "Reclamación"
 
 #. module: crm_claim_extention
+#: view:crm.claim.type:crm_claim_extention.crm_claim_type_tree
+msgid "Claim Stages"
+msgstr "Estado del reclamo"
+
+#. module: crm_claim_extention
+#: view:crm.claim.type:crm_claim_extention.crm_claim_type_form
+#: model:ir.actions.act_window,name:crm_claim_extention.crm_claim_type_act
+msgid "Claim Type"
+msgstr "Tipo de reclamo"
+
+#. module: crm_claim_extention
+#: model:ir.ui.menu,name:crm_claim_extention.menu_config_claim_extention
+msgid "Claim extention"
+msgstr "Extencion de reclamos"
+
+#. module: crm_claim_extention
 #: model:ir.model,name:crm_claim_extention.model_crm_claim_stage
 msgid "Claim stages"
 msgstr "Etapas de reclamación"
+
+#. module: crm_claim_extention
+#: help:crm.claim.type,parent_id:0
+msgid "Claim type."
+msgstr "Tipo de reclamo."
+
+#. module: crm_claim_extention
+#: field:crm.claim.type,create_uid:0
+msgid "Created by"
+msgstr "Creado por"
+
+#. module: crm_claim_extention
+#: field:crm.claim.type,create_date:0
+msgid "Created on"
+msgstr "Creado en"
+
+#. module: crm_claim_extention
+#: model:crm.claim.stage,name:crm_claim_extention.stage_claim7
+msgid "DEFENSA CONSUMIDOR"
+msgstr "DEFENSA CONSUMIDOR"
+
+#. module: crm_claim_extention
+#: field:crm.claim.stage,days_to_date_deadline:0
+msgid "Date to deadline"
+msgstr "Dias para el deadline"
+
+#. module: crm_claim_extention
+#: field:crm.claim.stage,day_to_action_next:0
+msgid "Days to next action"
+msgstr "Days to next action"
+
+#. module: crm_claim_extention
+#: field:crm.claim.type,id:0
+msgid "ID"
+msgstr "ID"
+
+#. module: crm_claim_extention
+#: model:crm.claim.stage,name:crm_claim_extention.stage_claim1
+msgid "INICIADO"
+msgstr "INICIADO"
+
+#. module: crm_claim_extention
+#: model:crm.claim.stage,name:crm_claim_extention.stage_claim6
+msgid "INVALIDO"
+msgstr "INVALIDO"
+
+#. module: crm_claim_extention
+#: field:crm.claim.type,write_uid:0
+msgid "Last Updated by"
+msgstr "Last Updated by"
+
+#. module: crm_claim_extention
+#: field:crm.claim.type,write_date:0
+msgid "Last Updated on"
+msgstr "Last Updated on"
+
+#. module: crm_claim_extention
+#: field:crm.claim.type,name:0
+msgid "Name"
+msgstr "Name"
+
+#. module: crm_claim_extention
+#: field:crm.claim.stage,action_next:0
+msgid "Next Action"
+msgstr "Proxima Accion"
+
+#. module: crm_claim_extention
+#: field:crm.claim,number_id:0
+msgid "Number"
+msgstr "Numero"
 
 #. module: crm_claim_extention
 #: field:crm.claim,origin:0
@@ -31,14 +147,59 @@ msgid "Origin"
 msgstr "Origen"
 
 #. module: crm_claim_extention
+#: model:crm.claim.stage,name:crm_claim_extention.stage_claim8
+msgid "PROVEEDOR"
+msgstr "PROVEEDOR"
+
+#. module: crm_claim_extention
 #: field:crm.claim,products_id:0
 msgid "Productos"
 msgstr "Productos"
 
 #. module: crm_claim_extention
+#: model:crm.claim.stage,name:crm_claim_extention.stage_claim3
+msgid "RESOLUCION"
+msgstr "RESOLUCION"
+
+#. module: crm_claim_extention
 #: field:crm.claim.stage,user_id:0
 msgid "Responsible"
 msgstr "Responsable"
+
+#. module: crm_claim_extention
+#: model:crm.claim.stage,name:crm_claim_extention.stage_claim4
+msgid "SOLUCIONADO"
+msgstr "SOLUCIONADO"
+
+#. module: crm_claim_extention
+#: sql_constraint:crm.claim:0
+msgid "The Number must be unique per Company"
+msgstr "The Number must be unique per Company"
+
+#. module: crm_claim_extention
+#: field:crm.claim,type_id:0
+msgid "Type"
+msgstr "Type"
+
+#. module: crm_claim_extention
+#: model:ir.model,name:crm_claim_extention.model_crm_claim_type
+msgid "Type of Claim"
+msgstr "Tipo de reclamo"
+
+#. module: crm_claim_extention
+#: field:crm.claim.type,parent_id:0
+msgid "Type of claim"
+msgstr "Tipo de reclamo"
+
+#. module: crm_claim_extention
+#: model:ir.ui.menu,name:crm_claim_extention.menu_crm_claim_type-act
+msgid "Types of claim"
+msgstr "Tipos de reclamo"
+
+#. module: crm_claim_extention
+#: model:crm.claim.stage,name:crm_claim_extention.stage_claim2
+msgid "VISITA"
+msgstr "VISITA"
 
 #. module: crm_claim_extention
 #: field:crm.claim,has_check_solution:0

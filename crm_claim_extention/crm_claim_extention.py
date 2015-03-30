@@ -39,10 +39,13 @@ class crm_claim(osv.osv):
     _inherit = "crm.claim"
     _columns = {
         'origin': fields.char('Origin',size=30,readonly=True),
-        'products_id': fields.many2many('product.product', 'crm_claim_products', 'crm_claim_id', 'product_id', 'Productos'),
+        'products_id': fields.many2many('product.product', 'crm_claim_products', 'crm_claim_id', 'product_id', 'Productos', track_visibility='onchange'),
         'has_check_solution': fields.boolean('has check soluction',readonly=True),
         'number_id': fields.char('Number', size=64, select=True),
         'type_action': fields.selection(AVAILABLE_ACTIONS, 'Action Type',readonly=True),    # Override required and selections
+        'type_id': fields.many2one('crm.claim.type', 'Type'),
+
+
         #'product_id' : fields.Many2one('product.product'),
         #'ref': fields.reference('Reference', selection=openerp.addons.base.res.res_request.referencable_models),
 
@@ -56,6 +59,8 @@ class crm_claim(osv.osv):
         ]    
     def create(self, cr, uid, vals, context=None):
         if not 'number_id' in vals or vals['number_id'] == '/':
+            if not 'origin' in vals :
+                vals['origin'] = 'self'
             vals['number_id'] = vals['origin'] +  str(self.pool.get('ir.sequence').get(cr, uid, 'crm.claim'))
             #vals['number_id'] = vals['origin'] +  str(self.pool.get('ir.sequence').get(cr, uid, 'crm.claim'))
         return super(crm_claim, self).create(cr, uid, vals, context)
@@ -103,3 +108,23 @@ class crm_claim_stage(osv.osv):
         'day_next_action': lambda self, cr, uid, context: '7',
     }
 crm_claim_stage()
+
+
+class crm_claim_type(osv.osv):
+    """ Type of Claim """
+    _name = "crm.claim.type"
+    _description = "Type of Claim"
+    _columns = {
+        'name': fields.char('Name', required=True, translate=True),
+        'parent_id': fields.many2one('crm.claim.type', 'Type of claim', required=False, ondelete='cascade',
+            help="Claim type."),
+    }
+
+    """def _find_object_id(self, cr, uid, context=None):
+        context = context or {}
+        object_id = context.get('object_id', False)
+        ids = self.pool.get('ir.model').search(cr, uid, ['|', ('id', '=', object_id), ('model', '=', context.get('object_name', False))])
+        return ids and ids[0] or False
+    _defaults = {
+        'object_id': _find_object_id
+    }"""
