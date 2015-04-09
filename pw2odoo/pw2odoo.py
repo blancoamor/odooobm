@@ -5,12 +5,15 @@ import xmlrpclib
 import datetime
 import time
 import re
+import os.path
+import base64
 from decimal import *
 
 class pw2odoo(object):
 
     log_type='print'
     country_states = {}
+    vat_responsability = {}
     category_map = {}
     supplier_res_id = {}
     res_users_id = {}
@@ -19,6 +22,8 @@ class pw2odoo(object):
     claim_stage_map = {"CANCELADO POR EL CLIENTE":"INVALIDO","DEFENSA DEL CONSUMIDOR":"DEFENSA CCONSUMIDOR","EN OBSERVACION":"CONFIRMADO","FALTA RESPUESTA DEL CLIENTE":""
     ,"INICIADO":"INICIADO","PENDIENTE":"RESOLUCION","PENDIENTE DE CAMBIO":"RESOLUCION","PENDIENTE DE ENTREGA":"RESOLUCION","PENDIENTE DE RESOLUCION":"RESOLUCION","PENDIENTE DE VISITA":"",
     "PENDIENTE RESPUESTA DEL CLIENTE":"RESOLUCION","RECLAMO INVALIDO":"INVALIDO","SOLUCIONADO":"SOLUCIONADO",}
+    pw_situacion_iva=['','IVA Responsable Inscripto', 'IVA Responsable No Inscripto', 'Responsable Monotributo','IVA Exento' ,'Consumidor Final']
+
 
     product_template_id = {}
     product_product_id = {}
@@ -100,7 +105,7 @@ class pw2odoo(object):
           return self.res_users_id[UsuarioKey]
         else : 
           return 1
-      def claim_stage_get_id(self,estado):
+    def claim_stage_get_id(self,estado):
 
         if hasattr(self.claim_stage_id, str(estado)):
           return self.claim_stage_id[estado]
@@ -116,7 +121,7 @@ class pw2odoo(object):
             return self.claim_stage_id[estado]
 
     def product_template_get_id(self,ArticuloKey):
-      
+        
       if hasattr(self.product_template_id, str(ArticuloKey)):
         return self.product_template_id[ArticuloKey]
       else :
@@ -128,6 +133,22 @@ class pw2odoo(object):
         if len(data):
           self.product_template_id[ArticuloKey]=data[0]['res_id']
           return self.product_template_id[ArticuloKey]
+        else : 
+          return 1
+
+    def supplier_get_id(self,ProveedorKey):
+        
+      if hasattr(self.supplier_res_id, str(ProveedorKey)):
+        return self.supplier_res_id[ProveedorKey]
+      else :
+        model = 'ir.model.data'
+        args = [('name', '=', 'PK' + str(ProveedorKey)),('model', '=', 'res.partner'),]
+        ids = self.sock.execute(self.dbname, self.uid, self.pwd, 'ir.model.data', 'search', args)
+        fields = ['res_id'] #fields to read
+        data = self.sock.execute(self.dbname, self.uid, self.pwd, 'ir.model.data', 'read', ids, fields)
+        if len(data):
+          self.supplier_res_id[ProveedorKey]=data[0]['res_id']
+          return self.supplier_res_id[ProveedorKey]
         else : 
           return 1
 
@@ -147,6 +168,21 @@ class pw2odoo(object):
           if len(ids):
             self.product_template_id[ArticuloKey]=ids[0]
             return self.product_template_id[ArticuloKey]
+
+    def category_get_id(self,RubroKey):
+      if hasattr(self.category_map, str(RubroKey)):
+        return self.category_map[RubroKey]
+      else :
+        model = 'ir.model.data'
+        args = [('name', '=', 'RK' + str(RubroKey)),('model', '=', 'product.category'),]
+        ids = self.sock.execute(self.dbname, self.uid, self.pwd, 'ir.model.data', 'search', args)
+        if ids:
+          fields = ['res_id'] #fields to read
+          data_tmp = self.sock.execute(self.dbname, self.uid, self.pwd, 'ir.model.data', 'read', ids, fields)
+
+          if len(ids):
+            self.category_map[RubroKey]=data_tmp[0]['res_id']
+            return self.category_map[RubroKey]
 
 
     def check_vat(self,vat):
@@ -199,6 +235,16 @@ class pw2odoo(object):
         self.country_states['Cordoba']=self.country_states[u'C\xf3rdoba']
         self.country_states['Tucuman']=self.country_states[u'Tucum\xe1n']
 
+    def mapping_vat_responsability(self):
+        args = []
+        ids = self.sock.execute(self.dbname, self.uid, self.pwd, 'afip.responsability', 'search', args)
+        fields = ['name','id'] #fields to read
+        afip_vat_responsability = self.sock.execute(self.dbname, self.uid, self.pwd, 'afip.responsability', 'read',ids, fields)
+        for responsability in afip_vat_responsability:
+          self.vat_responsability[responsability['name']]=responsability['id']
+
+
+
 
     def import_all(self,start):
         pass
@@ -209,7 +255,7 @@ class pw2odoo(object):
     def mapping(self,row):
         pass
 
-    def after_insert_update(self,row):
+    def after_insert_update(self,row,map_object):
         pass
 
     def insert_update(self,row):
@@ -218,13 +264,13 @@ class pw2odoo(object):
         args = [('name', '=', str(self.prefixKey) + str(row[self.pwKey])),('model', '=', self.odooModel),]
         ids = self.sock.execute(self.dbname, self.uid, self.pwd, 'ir.model.data', 'search', args)
         if ids :
-            self.update(ids,row)
+            map_object=self.update(ids,row)
             self.log('update',row)
 
         else:
-            self.insert(row)
+            map_object=self.insert(row)
             self.log('insert',row)
-        self.after_insert_update(row)
+        self.after_insert_update(row,map_object)
 
 
     def insert(self,row):
@@ -237,6 +283,8 @@ class pw2odoo(object):
             'res_id' : odooObject_id, 
           }
           external_id = self.sock.execute(self.dbname, self.uid, self.pwd, 'ir.model.data', 'create', external_link)
+          return {'id': external_link , 'map_object':odooObject}
+
         except :
           print (row)
           print (odooObject)
@@ -246,6 +294,8 @@ class pw2odoo(object):
         data = self.sock.execute(self.dbname, self.uid, self.pwd,'ir.model.data', 'read', ids, fields)
         odooObject=self.mapping(row)
         odoo_id = self.sock.execute(self.dbname, self.uid, self.pwd, self.odooModel, 'write',data[0]['res_id'], odooObject)
+        return {'id': data[0]['res_id'] , 'map_object':odooObject}
+
     def log(self,action,row):
          if(self.log_type=='print'):
             print action + " " + self.pwKey + ":" + str(row[self.pwKey]) + " -> "  + self.odooModel
@@ -257,6 +307,8 @@ class pw_proveedor(pw2odoo):
 
     def import_all(self,start):
         self.mapping_res_country_state()
+        self.mapping_vat_responsability()
+
         self.cursor.execute("SELECT prv.*,p.Nombre as NombreProvincia FROM Proveedor prv "
                      "left join localidad l  on (l.LocalidadKey=prv.LocalidadKey) "
                     "left join provincia p  on (l.ProvinciaKey=p.ProvinciaKey) "
@@ -266,6 +318,7 @@ class pw_proveedor(pw2odoo):
 
     def import_from_time(self,start):
         self.mapping_res_country_state()
+        self.mapping_vat_responsability()
 
         self.cursor.execute("select top 1000 prvl.FechaLog,prvl.TipoLog , prv.* , p.Nombre as NombreProvincia "
                      "From ProveedorLog prvl "
@@ -348,7 +401,9 @@ class pw_cliente(pw2odoo):
     pwKey="ClienteKey"
     odooModel='res.partner'
 
+
     def import_all(self,start):
+        self.mapping_vat_responsability()
         self.mapping_res_country_state()
         end=start + 1000
         self.cursor.execute("SELECT * FROM "
@@ -366,6 +421,7 @@ class pw_cliente(pw2odoo):
 
     def import_from_time(self,start):
         self.mapping_res_country_state()
+        self.mapping_vat_responsability()
 
         self.cursor.execute("select top 1000 cl.FechaLog,cl.TipoLog , c.* , p.Nombre as NombreProvincia "
                      "From ClienteLOG cl "
@@ -408,23 +464,31 @@ class pw_cliente(pw2odoo):
         if row['RazonSocial'] is None :
             row['RazonSocial']=row['Apellido'] + ' ' + row['Nombre']
 
+            
+
+
 
 
         partner = {
          'name': row['RazonSocial'].lstrip().rstrip().title(),
          'lang':'es_AR',
+         'property_account_receivable': 11, #esto esta cacheado ver que hacemo
+         'property_account_payable': 11, #esto esta cacheado ver que hacemo
         }
 
         partner['state_id']=self.country_states['Neuquen']
 
+
+
+
         #if (row['CUIT'] is not None) and (row['CUIT'].replace('-','').replace(' ',''))  :
         # partner['vat'] ='ar'+row['CUIT'].replace('-','').replace(' ','')
 
-        #if (row['CUIT'] is not None) and (check_vat(row['CUIT'].replace('-','').replace(' ','')))  :
-        #partner['vat'] ='ar'+row['CUIT'].replace('-','').replace(' ','')
+        if (row['CUIT'] is not None) and (self.check_vat(row['CUIT'].replace('-','').replace(' ','')))  :
+          partner['vat'] ='ar'+row['CUIT'].replace('-','').replace(' ','')
 
         if row['Email'] is not None :
-          email=email_regepx.search(row['Email']);
+          email=email_regepx.search(row['Email'].encode('utf-8', 'ignore'));
           if(email is not None):      
             row['Email']=str(email.group())
           else :
@@ -439,7 +503,9 @@ class pw_cliente(pw2odoo):
           mobile=mob.search(row['Telefono']);
           if(mobile is not None):      
             row['TelefonoMovil']=str(mobile.group())
-
+  
+        if hasattr(self.vat_responsability ,self.pw_situacion_iva[row['SituacionIVAKey']]):
+          partner['responsability_id']=self.vat_responsability[self.pw_situacion_iva[row['SituacionIVAKey']]]
 
 
         if row['SituacionIVAKey'] == 1:
@@ -709,3 +775,248 @@ class pw_invoice(pw2odoo):
       return user
 
 
+class pw_articulo(pw2odoo):
+    prefixKey="AK"
+    pwKey="ArticuloKey"
+    odooModel='product.template'
+
+    def import_all(self,start):
+      end=start+1000
+
+      self.cursor.execute("SELECT * FROM "
+                 "( SELECT a.*,ap.Descripcion as DescripcionProv, CodigoProv, Costo1, p.RazonSocial as NombreProveedor, ROW_NUMBER() OVER (ORDER BY a.ArticuloKey) AS row "
+                 "FROM Articulo a "
+                 "left join ArticuloProveedor ap on (a.ArticuloKey=ap.ArticuloKey) "
+                 "left join proveedor p on (p.ProveedorKey = ap.ProveedorKey) "
+
+                 "where a.Nombre <>'' "
+                 ") "
+                 "a WHERE row > %d AND row <= %d " 
+                 % (start,end))
+
+      for row in self.cursor.fetchall():
+        self.insert_update(row)
+
+
+    def import_from_time(self,start):
+
+      self.cursor.execute("SELECT al.FechaLog, a.*,ap.Descripcion as DescripcionProv, CodigoProv, Costo1, p.RazonSocial as NombreProveedor, ROW_NUMBER() OVER (ORDER BY a.ArticuloKey) AS row "
+                     "From ArticuloLog al "
+                     "join Articulo a on (a.ArticuloKey=al.ArticuloKey)"
+                     "left join ArticuloProveedor ap on (a.ArticuloKey=ap.ArticuloKey) "
+                     "left join proveedor p on (p.ProveedorKey = ap.ProveedorKey) "
+
+                     "where a.Nombre <>'' and FechaLog > '%s'"
+                     % (start))
+
+      last_time=''
+      for row in self.cursor:
+        self.insert_update(row)
+        last_time=row['FechaLog']
+
+      if(last_time):
+        ir_set_config_parameter('pw.articulo.last_import_time',last_time.strftime("%Y-%m-%d %H:%M:%S"))
+
+
+    def mapping(self,row):
+
+
+      relations = {
+       'Activo':'active',
+       'Codigo' : 'default_code',
+       #'PrecioVenta':'list_pice',
+      }
+      
+
+      product_template = {
+        'name': row['Nombre'].lstrip().rstrip().title(),
+        'mes_type':'fixed',
+        'uom_id':1,
+        'uom_po_id':1,
+        'type':'consu',
+        'procure_method':'make_to_stock',
+        'cost_method':'standard',
+
+      }
+      if(os.path.isfile("./images/" + row['Codigo'] )):
+          print "Existe " +  row['Codigo']
+          #fileImage = request.files.get("./images/" + row['Codigo'] )
+          #image = fileImage.file.read()
+          f = open("./images/" + row['Codigo'], "rb")
+          image = f.read()
+          product_template['image'] = base64.b64encode(image)
+          os.rename("./images/" + row['Codigo'] , "./images/proccess_" + row['Codigo'] )
+
+      if row['Costo1'] is not None:
+            product_template['standard_price']=float(row['Costo1']);
+
+      product_template['categ_id']=13
+      for key in relations:
+         if row[key] is not None:
+            product_template[relations[key]]=row[key]
+
+
+      product_template['list_pice']= float(row['PrecioVenta'])
+
+
+      category=self.category_get_id(row['RubroKey'])
+      if category:
+        product_template['categ_id']=category
+
+      return product_template
+    
+
+    def after_insert_update(self,row,map_object):
+        ids = None
+
+        model = 'ir.model.data'
+        args = [('name', '=', 'APK' + str(row['ArticuloKey'])),('model', '=', 'product.supplierinfo'),]
+        ids = self.sock.execute(self.dbname, self.uid, self.pwd, 'ir.model.data', 'search', args)
+        if ids :
+          self.product_supplierinfo_update(ids,row,map_object['id'])
+        else:
+          self.product_supplierinfo_insert(row,map_object['id'])
+
+             
+    def product_supplierinfo_mapping(self,row,product_res_id):
+      if row['DescripcionProv'] is None:
+        desc = row['Nombre'].lstrip().rstrip().title()
+      else :
+        desc = row['DescripcionProv'].lstrip().rstrip().title()
+
+      if row['CodigoProv'] is None:
+        CodigoProv = '000'
+      else :
+        CodigoProv = row['CodigoProv'].lstrip().rstrip().title()
+
+      supplier_id = self.supplier_get_id(row['ProveedorKey'])
+      product_supplierinfo = {
+        'product_name': desc,
+        'product_code': CodigoProv,
+        'product_tmpl_id': product_res_id ,
+        'name' : str(supplier_id),
+
+      }
+
+      return product_supplierinfo
+
+    def product_supplierinfo_insert(self,row,product_res_id):
+      product_supplierinfo = self.product_supplierinfo_mapping(row,product_res_id)  
+      product_supplierinfo_id = self.sock.execute(self.dbname, self.uid, self.pwd, 'product.supplierinfo', 'create', product_supplierinfo)
+      
+      external_link = {
+        'name' : 'APK' + str(row['ArticuloKey']),
+        'model' : 'product.supplierinfo',
+        'res_id' : product_supplierinfo_id, 
+      }
+      external_id = self.sock.execute(self.dbname, self.uid, self.pwd, 'ir.model.data', 'create', external_link)
+      #pricelist_partnerinfo_insert_update(row,product_supplierinfo_id)
+
+    def product_supplierinfo_update(self,ids,row,product_res_id):
+      fields = ['res_id'] #fields to read
+      data = self.sock.execute(self.dbname, self.uid, self.pwd, 'ir.model.data', 'read', ids, fields)
+      product_supplierinfo = self.product_supplierinfo_mapping(row,product_res_id)  
+      product_supplierinfo_id = self.sock.execute(self.dbname, self.uid, self.pwd, 'product.supplierinfo', 'write',data[0]['res_id'], product_supplierinfo)
+      self.pricelist_partnerinfo_insert_update(row,data[0]['res_id'])
+
+    def pricelist_partnerinfo_insert_update(self,row,suppinfo_id):
+      ids = None
+      model = 'ir.model.data'
+      args = [('name', '=', 'PPI' + str(row['ArticuloKey'])),('model', '=', 'pricelist.partnerinfo'),]
+      ids = self.sock.execute(self.dbname, self.uid, self.pwd, 'ir.model.data', 'search', args)
+      if ids :
+        self.pricelist_partnerinfo_update(ids,row,suppinfo_id)
+      else:
+        self.pricelist_partnerinfo_insert(row,suppinfo_id)
+
+
+    def pricelist_partnerinfo_insert(self,row,suppinfo_id):
+      pricelist_partnerinfo = self.pricelist_partnerinfo_mapping(row,suppinfo_id)  
+      pricelist_partnerinfo_id = self.sock.execute(self.dbname, self.uid, self.pwd, 'pricelist.partnerinfo', 'create', pricelist_partnerinfo)
+      external_link = {
+        'name' : 'PPI' + str(row['ArticuloKey']),
+        'model' : 'pricelist.partnerinfo',
+        'res_id' : pricelist_partnerinfo_id, 
+      }
+      external_id = self.sock.execute(self.dbname, self.uid, self.pwd, 'ir.model.data', 'create', external_link)
+
+
+
+    def pricelist_partnerinfo_update(self,ids,row,suppinfo_id):
+      fields = ['res_id'] #fields to read
+      data = self.sock.execute(self.dbname, self.uid, self.pwd, 'ir.model.data', 'read', ids, fields)
+      pricelist_partnerinfo = self.pricelist_partnerinfo_mapping(row,suppinfo_id)  
+      pricelist_partnerinfo_id = self.sock.execute(self.dbname, self.uid, self.pwd, 'pricelist.partnerinfo', 'write',data[0]['res_id'], pricelist_partnerinfo)
+
+    def pricelist_partnerinfo_mapping(self,row,suppinfo_id):
+      pricelist_partnerinfo = {
+        'suppinfo_id': suppinfo_id,
+        'min_quantity': 1,
+
+      }
+      if row['Costo1']:
+        pricelist_partnerinfo['price']= float(row['Costo1'])
+      else:
+        pricelist_partnerinfo['price']= 0.0
+
+      return pricelist_partnerinfo
+
+
+class account_invoice(pw2odoo):
+    prefixKey="FK"
+    pwKey="OperacionKey"
+    odooModel='account.invoice'
+
+    def import_all(self,start):
+      end=start+1000
+
+      self.cursor.execute("SELECT * FROM "
+                 "(SELECT  ov.* , ROW_NUMBER() OVER (ORDER BY ov.OperacionKey) AS row"
+                 "from OperacionVenta ov "
+                 ") "
+                 "a WHERE row > %d AND row <= %d " 
+                 % (start,end))
+
+      for row in self.cursor.fetchall():
+        self.insert_update(row)
+
+
+
+    def mapping(self,row):
+
+      '''
+       id | comment | origin | check_total | partner_bank_id | payment_term | number | write_uid | create_uid | user_id | supplier_invoice_number | 
+       message_last_post | company_id | amount_tax | type | sent | internal_number | account_id | date_invoice | period_id | amount_total | name | 
+       commercial_partner_id | date_due | create_date | reference | currency_id | partner_id | fiscal_position | amount_untaxed | reference_type | 
+       journal_id | state | reconciled | residual | move_name | write_date | move_id | section_id | afip_service_start | afip_service_end | 
+       afip_document_class_id | afip_document_number | journal_document_class_id | responsability_id 
+      '''
+
+      res_partner=res_partner_get_id(row['ClienteKey'])
+      #user_id = user_get_id(row['VendedorKey']) #VendedorKey
+
+
+
+      relations = {
+       'Numero':'number',
+       'Numero':'name',
+       'ImporteTotal' : 'amount_total',
+       'amount_tax' : 'MontoIVA' ,
+
+      }
+      
+      #CondicionPagoKey
+      #Clase
+
+      account_invoice = {
+        'create_date' : row['FechaFactura'].strftime('%Y/%m/%d %H:%M') ,
+        'write_date' : row['FechaFactura'].strftime('%Y/%m/%d %H:%M') ,
+
+        'date_due':row['FechaFactura'], 
+        'res_partner':res_partner,
+        'currency_id' : currency_id,
+
+      }
+
+      return account_invoice
+    

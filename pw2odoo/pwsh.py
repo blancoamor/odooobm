@@ -69,6 +69,19 @@ if action=='res_user_import_all':
   transaction=pw2odoo.pw_users('localhost:8069',dbname,username,pwd)
   transaction.import_all(0)
   
+if action=='product_template_import_all':
+  start=int(start)
+  for x in range(start, end):
+    pos = x * 1000
+    print ("posicion %d %s"  % (pos,condition))
+    #pw2odoo.pw2odoo('localhost:8069',dbname,username,pwd)
+    transaction=pw2odoo.pw_articulo('localhost:8069',dbname,username,pwd)
+    transaction.import_all(pos)
+
+if action=='product_template_import_from_time':
+    transaction=pw2odoo.pw_articulo('localhost:8069',dbname,username,pwd)
+    transaction.import_from_time(start)
+
 
 if action=='crm_claim_stage_import_all':
   pw2odoo.crm_claim_stage_import_all()
@@ -98,13 +111,6 @@ if action=='category_map':
   print (pw2odoo.category_maping())
 
 
-if action=='product_template_import_all':
-  start=int(start)
-  pw2odoo.category_maping()
-  for x in range(start, end):
-    pos = x * 1000
-    print ("posicion %d" % (pos))
-    pw2odoo.product_template_import_all(pos)
 
 if action=='product_pricelist_import_all':
     pw2odoo.product_pricelist_import_all()
