@@ -40,6 +40,8 @@ class crm_claim(osv.osv):
     _columns = {
         'origin': fields.char('Origin',size=30,readonly=True),
         'products_id': fields.many2many('product.product', 'crm_claim_products', 'crm_claim_id', 'product_id', 'Productos', track_visibility='onchange'),
+        'invoice_id': fields.many2many('account.invoice', 'crm_claim_invoice', 'crm_claim_id', 'invoice_id', 'Facturas', track_visibility='onchange'),
+        'invoice_lines': fields.many2many('account.invoice.line', 'crm_claim_invoice_line', 'crm_claim_id', 'invoice_line_id', 'Productos', track_visibility='onchange'),
         'has_check_solution': fields.boolean('has check soluction',readonly=True),
         'number_id': fields.char('Number', size=64, select=True),
         'type_action': fields.selection(AVAILABLE_ACTIONS, 'Action Type',readonly=True),    # Override required and selections
@@ -128,3 +130,14 @@ class crm_claim_type(osv.osv):
     _defaults = {
         'object_id': _find_object_id
     }"""
+
+'''
+class crm_claim_invoice_line(osv.osv):
+    """ Claim  invoice line"""
+    _name = "crm.claim.type"
+    _description = "Type of Claim"
+    _columns = {
+        'name': fields.char('Name', required=True, translate=True),
+        'parent_id': fields.many2one('crm.claim.type', 'Type of claim', required=False, ondelete='cascade',
+            help="Claim type."),
+    }

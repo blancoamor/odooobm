@@ -88,7 +88,10 @@
             <field name="arch" type="xml">
                 <field name="name" position="after">
                             <field name="origin"/>
-                            <field name="products_id" widget="many2many_tags"  options="{'no_create_edit': True}"/>
+                            <field name="products_id" widget="many2many_tags"  options="{'no_create': True}"/>
+                            <field name="invoice_id" widget="many2many_tags"  options="{'no_create': True}"/>
+                            <field name="invoice_id_line" widget="many2many_checkboxes"  options="{'no_create_edit': True}"/>
+                            
                             <field name="type_id"/>
                 </field>
                 <field name="priority" position="after">

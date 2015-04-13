@@ -64,6 +64,15 @@ if action=='proveedor_import_from_time':
   transaction=pw2odoo.pw_proveedor('localhost:8069',dbname,username,pwd)
   transaction.import_from_time(start)
 
+if action=='invoice_import_all':
+  start=int(start)
+  transaction=pw2odoo.account_invoice('localhost:8069',dbname,username,pwd)
+  for x in range(start, end):
+    pos = x * 1000
+    print ("posicion %d %s"  % (pos,condition))  
+    transaction.import_all(pos)
+
+
 
 if action=='res_user_import_all':
   transaction=pw2odoo.pw_users('localhost:8069',dbname,username,pwd)

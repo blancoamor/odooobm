@@ -147,7 +147,7 @@ class pw2odoo(object):
         fields = ['res_id'] #fields to read
         data = self.sock.execute(self.dbname, self.uid, self.pwd, 'ir.model.data', 'read', ids, fields)
         if len(data):
-          self.supplier_res_id[ProveedorKey]=data[0]['res_id']
+          self.supplier_res_id[Proveedorproduct_product_get_idKey]=data[0]['res_id']
           return self.supplier_res_id[ProveedorKey]
         else : 
           return 1
@@ -162,12 +162,16 @@ class pw2odoo(object):
         if ids:
           fields = ['res_id'] #fields to read
           data_tmp = self.sock.execute(self.dbname, self.uid, self.pwd, 'ir.model.data', 'read', ids, fields)
-
-          args = [('product_tmpl_id', '=', data_tmp[0]['res_id']),]
+          print data_tmp
+          args = [('product_tmpl_id', '=', int(data_tmp[0]['res_id'])),]
+          print args
           ids = self.sock.execute(self.dbname, self.uid, self.pwd, 'product.product', 'search', args)
+          print ids
           if len(ids):
             self.product_template_id[ArticuloKey]=ids[0]
             return self.product_template_id[ArticuloKey]
+          else :
+            return 12160
 
     def category_get_id(self,RubroKey):
       if hasattr(self.category_map, str(RubroKey)):
@@ -285,7 +289,7 @@ class pw2odoo(object):
           external_id = self.sock.execute(self.dbname, self.uid, self.pwd, 'ir.model.data', 'create', external_link)
           return {'id': external_link , 'map_object':odooObject}
 
-        except :
+        except ValueError:
           print (row)
           print (odooObject)
 
@@ -968,10 +972,10 @@ class account_invoice(pw2odoo):
     odooModel='account.invoice'
 
     def import_all(self,start):
-      end=start+1000
+      end=start+100
 
       self.cursor.execute("SELECT * FROM "
-                 "(SELECT  ov.* , ROW_NUMBER() OVER (ORDER BY ov.OperacionKey) AS row"
+                 "(SELECT  ov.* , ROW_NUMBER() OVER (ORDER BY ov.OperacionKey) AS row "
                  "from OperacionVenta ov "
                  ") "
                  "a WHERE row > %d AND row <= %d " 
@@ -992,31 +996,70 @@ class account_invoice(pw2odoo):
        afip_document_class_id | afip_document_number | journal_document_class_id | responsability_id 
       '''
 
-      res_partner=res_partner_get_id(row['ClienteKey'])
-      #user_id = user_get_id(row['VendedorKey']) #VendedorKey
+      partner_id=self.res_partner_get_id(row['ClienteKey'])
+      if partner_id==1:
+        partner_id=79495 #to-do ver consumidor final
 
+      #user_id = user_get_id(row['VendedorKey']) #VendedorKey
 
 
       relations = {
        'Numero':'number',
-       'Numero':'name',
-       'ImporteTotal' : 'amount_total',
-       'amount_tax' : 'MontoIVA' ,
-
       }
-      
       #CondicionPagoKey
       #Clase
 
       account_invoice = {
-        'create_date' : row['FechaFactura'].strftime('%Y/%m/%d %H:%M') ,
-        'write_date' : row['FechaFactura'].strftime('%Y/%m/%d %H:%M') ,
+        #'create_date' : row['FechaFactura'].strftime('%Y/%m/%d %H:%M') ,
+        #'write_date' : row['FechaFactura'].strftime('%Y/%m/%d %H:%M') ,
 
-        'date_due':row['FechaFactura'], 
-        'res_partner':res_partner,
-        'currency_id' : currency_id,
+        'date_invoice':row['FechaFactura'].strftime('%Y/%m/%d %H:%M'), 
+        'partner_id':partner_id,
+        'currency_id' : 20,
+        'number' : row['Numero'].lstrip().rstrip(),
+        'account_id' : 11 ,
+        'amount_total' : float(row['ImporteTotal']),
+
+        'amount_untaxed' : float(row['SumaItemsNG']),
+        'amount_tax' : float(row['MontoIVA']) ,
 
       }
-
+      products=self.operacion_venta_articulos(row['OperacionKey'],account_invoice)
+      account_invoice['invoice_line']=[(6,0,products)]
+      
+      '''for key in relations:
+               if row[key] is not None:
+                  account_invoice[relations[key]]=row[key]
+      '''
       return account_invoice
-    
+      
+    def operacion_venta_articulos(self,OperacionKey,order):
+      '''
+       id | product_uos_qty |        create_date         | product_uom | sequence | order_id | price_unit | product_uom_qty | write_uid 
+       | discount |         write_date         | product_uos | salesman_id | invoiced | create_uid | product_id | company_id |name| delay
+        |   state   | order_partner_id | th_weight | address_allotment_id 
+
+      '''
+      lines=[]
+      self.cursor.execute("select * from VentaItem where OperacionKey= %d" 
+                 % (OperacionKey))
+
+      for row in self.cursor.fetchall():
+        #product_id=self.product_product_get_id(row['ArticuloKey'])
+        product_id=self.product_template_get_id(row['ArticuloKey'])
+        line={'uos_id':1,'product_uom_qty': float(row['Cantidad']) ,'price_unit':float(row['PrecioUnitarioFinal']),
+          'price_subtotal':float(row['PrecioTotalFinal']), 
+          'name':row['Descripcion'], 'product_id':product_id,'discount':float(row['PorcentajeDescuento']),'create_date':order['date_invoice'],
+          'order_partner_id' :  order['partner_id'],'account_id':87}
+
+        line_id = self.sock.execute(self.dbname, self.uid, self.pwd, 'account.invoice.line', 'create', line)
+        lines.append(line_id)
+
+        
+        '''lines.append({'uos_id':1,'product_uom_qty': float(row['Cantidad']) ,'price_unit':float(row['PrecioUnitarioFinal']),
+          'price_subtotal':float(row['PrecioTotalFinal']), 
+          'name':row['Descripcion'], 'product_id':product_id,'discount':float(row['PorcentajeDescuento']),'create_date':order['date_invoice'],
+          'order_partner_id' :  order['partner_id'],'account_id':87})
+        #print lines
+        #self.insert_update(row)'''
+      return lines
