@@ -88,10 +88,11 @@
             <field name="arch" type="xml">
                 <field name="name" position="after">
                             <field name="origin"/>
-                            <field name="products_id" widget="many2many_tags"  options="{'no_create': True}"/>
-                            <field name="invoice_id" widget="many2many_tags"  options="{'no_create': True}"/>
-                            <field name="invoice_id_line" widget="many2many_checkboxes"  options="{'no_create_edit': True}"/>
+                            <field name="products_id" widget="many2many_tags"  options="{'no_create': True}" attrs="{'invisible': [('products_id','==',[(6, False, [])])]}"/>
+                            <field name="invoice_id"  widget="many2many_tags" options="{'no_create': True}" on_change="onchange_invoice_id(invoice_id,context)" />
+                            <field name="invoice_line_id" widget="many2many_checkboxes" domain="[('invoice_id','in',invoice_id[0][2])]"/>
                             
+
                             <field name="type_id"/>
                 </field>
                 <field name="priority" position="after">

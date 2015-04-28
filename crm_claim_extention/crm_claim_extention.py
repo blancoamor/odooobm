@@ -26,6 +26,8 @@ from openerp import tools
 from openerp.tools.translate import _
 from openerp.tools import html2plaintext
 from datetime import datetime, timedelta
+import logging
+_logger = logging.getLogger(__name__)
 
 AVAILABLE_ACTIONS = [
         ('correction','Corrective Action'),
@@ -41,7 +43,7 @@ class crm_claim(osv.osv):
         'origin': fields.char('Origin',size=30,readonly=True),
         'products_id': fields.many2many('product.product', 'crm_claim_products', 'crm_claim_id', 'product_id', 'Productos', track_visibility='onchange'),
         'invoice_id': fields.many2many('account.invoice', 'crm_claim_invoice', 'crm_claim_id', 'invoice_id', 'Facturas', track_visibility='onchange'),
-        'invoice_lines': fields.many2many('account.invoice.line', 'crm_claim_invoice_line', 'crm_claim_id', 'invoice_line_id', 'Productos', track_visibility='onchange'),
+        'invoice_line_id': fields.many2many('account.invoice.line', 'crm_claim_invoice_line', 'crm_claim_id', 'invoice_line_id', 'Productos', track_visibility='onchange',domain="[('invoice_id', '=', invoice_id)]"),
         'has_check_solution': fields.boolean('has check soluction',readonly=True),
         'number_id': fields.char('Number', size=64, select=True),
         'type_action': fields.selection(AVAILABLE_ACTIONS, 'Action Type',readonly=True),    # Override required and selections
@@ -88,6 +90,34 @@ class crm_claim(osv.osv):
 
         return super(crm_claim, self).write(cr, uid, ids, vals, context=context)
 
+
+    def onchange_invoice_id(self, cr, uid, ids, invoice_id,  context=None):
+        _logger.info("filoquin ----- domain  : %r", invoice_id)
+        all_ids=[]
+        if invoice_id ==   [[6, False, []]]:
+            return {'value': {'email_from': False, 'partner_phone': 'sin xx'} ,'domain' :{'invoice_line_id':[('invoice_id','=',[0])]}}
+       
+        values = self.resolve_2many_commands(cr, uid, 'invoice_id', invoice_id, ['crm_claim_id', 'invoice_id'], context)
+        if len(values)<1 :
+            return {'value': {'email_from': False, 'partner_phone': 'sin datos'}}
+
+
+        #if len(values)>1 :
+            #all_ids.append('|')
+
+        for item in values:
+            _logger.info("my variable : %r", item['id'])
+            #all_ids.append(('invoice_id','=',item['id']))
+            all_ids.append(item['id'])
+
+
+        invoice = self.pool.get('account.invoice').browse(cr, uid, values[0]['id'], context=context)
+        _logger.info("todas : %r", all_ids)
+
+        return {'value': {'partner_id': invoice.partner_id.id, 'email_from': invoice.partner_id.email, 'partner_phone': invoice.partner_id.phone},'domain' :{'invoice_line_id':[('invoice_id','in',all_ids)]}}
+        
+
+
     def copy(self, cr, uid, _id, default={}, context=None):
         default.update({
                 'number_id': self.pool.get('ir.sequence').get(cr, uid, 'crm.claim'),
@@ -131,13 +161,4 @@ class crm_claim_type(osv.osv):
         'object_id': _find_object_id
     }"""
 
-'''
-class crm_claim_invoice_line(osv.osv):
-    """ Claim  invoice line"""
-    _name = "crm.claim.type"
-    _description = "Type of Claim"
-    _columns = {
-        'name': fields.char('Name', required=True, translate=True),
-        'parent_id': fields.many2one('crm.claim.type', 'Type of claim', required=False, ondelete='cascade',
-            help="Claim type."),
-    }
+
