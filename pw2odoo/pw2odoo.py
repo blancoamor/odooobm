@@ -75,7 +75,7 @@ class pw2odoo(object):
         }
             #partner_id = sock.execute(self.dbname, self.uid, self.pwd, 'res.partner', 'create', partner)
 
-        parameter_id = self.sock.execute(dbname, uid, self.pwd, 'irself..confself.ig_parameter', 'create',parameter)
+        parameter_id = self.sock.execute(self.dbname, self.uid, self.pwd, 'ir.config_parameter', 'create',parameter)
       
     def res_partner_get_id(self,ClienteKey):
       if hasattr(self.res_partner_id, str(ClienteKey)):
@@ -992,6 +992,23 @@ class account_invoice(pw2odoo):
         self.insert_update(row)
 
 
+    def import_from_time(self,start):
+
+        self.cursor.execute("select top 1000 * "
+                     "from OperacionVenta ov  "
+                     "where FechaFactura > '%s' "
+                     "order by FechaFactura asc " % (start))
+        last_time=''
+
+        for row in self.cursor.fetchall():
+            self.insert_update(row)
+            last_time=row['FechaFactura']
+
+        if(last_time):
+            self.ir_set_config_parameter('pw.account_invoice.last_import_time',last_time.strftime("%Y-%m-%d %H:%M:%S"))
+
+
+
 
     def mapping(self,row):
 
@@ -1012,6 +1029,7 @@ class account_invoice(pw2odoo):
 
       relations = {
        'Numero':'number',
+       'Numero':'name',
       }
       #CondicionPagoKey
       #Clase
