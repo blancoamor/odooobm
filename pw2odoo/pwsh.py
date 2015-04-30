@@ -131,6 +131,15 @@ if action=='up_to_date':
     start=transaction.ir_get_config_parameter('pw.cliente.last_import_time')
     transaction.import_from_time(start)
 
+    transaction=pw2odoo.pw_articulo('localhost:8069',dbname,username,pwd)
+    start=transaction.ir_get_config_parameter('pw.articulo.last_import_time')
+    transaction.import_from_time(start)
+
+
+    transaction=pw2odoo.pw_proveedor('localhost:8069',dbname,username,pwd)
+    start=transaction.ir_get_config_parameter('pw.proveedor.last_import_time')
+    transaction.import_from_time(start)
+
     #prv_start=pw2odoo.ir_get_config_parameter('pw.proveedor.last_import_time')
     #pw2odoo.proveedor_import_from_time(prv_start)
 
