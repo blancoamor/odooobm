@@ -519,8 +519,10 @@ class pw_cliente(pw2odoo):
         else:
             relations['Nombre']='firstname'
             relations['Apellido']='lastname'
-        if row['Apellido']:
-            del partner['name']
+          if row['Apellido']:
+              del partner['name']
+          else: 
+              row['Apellido'] =row['RazonSocial']
 
         for key in relations:
          if row[key] is not None:
