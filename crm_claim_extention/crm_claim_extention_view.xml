@@ -90,7 +90,7 @@
                             <field name="origin"/>
                             <field name="products_id" widget="many2many_tags"  options="{'no_create': True}" attrs="{'invisible': [('products_id','==',[(6, False, [])])]}"/>
                             <field name="invoice_id"  widget="many2many_tags" options="{'no_create': True}" on_change="onchange_invoice_id(invoice_id,context)" />
-                            <field name="invoice_line_id" widget="many2many_checkboxes" domain="[('invoice_id','in',invoice_id[0][2])]"/>
+                            <field name="invoice_line_id" widget="many2many_checkboxes" domain="[('invoice_id','in',invoice_id[0][2])]" attrs="{'invoice_id': [('products_id','==',[(6, False, [])])]}"/>
                             
 
                             <field name="type_id"/>

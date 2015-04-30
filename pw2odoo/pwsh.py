@@ -127,11 +127,11 @@ if action=='product_pricelist_import_all':
 
 
 if action=='up_to_date':
-    start=pw2odoo.ir_get_config_parameter('pw.cliente.last_import_time')
-    pw2odoo.mapping_res_country_state()
-    pw2odoo.partner_import_from_time(start)
+    transaction=pw2odoo.pw_cliente('localhost:8069',dbname,username,pwd)
+    start=transaction.ir_get_config_parameter('pw.cliente.last_import_time')
+    transaction.import_from_time(start)
 
-    prv_start=pw2odoo.ir_get_config_parameter('pw.proveedor.last_import_time')
-    pw2odoo.proveedor_import_from_time(prv_start)
+    #prv_start=pw2odoo.ir_get_config_parameter('pw.proveedor.last_import_time')
+    #pw2odoo.proveedor_import_from_time(prv_start)
 
 
